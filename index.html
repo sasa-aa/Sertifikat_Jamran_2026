@@ -5,19 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JAMBORE RANTING TAHUN 2026</title>
   
-  <!-- Pustaka PapaParse & Font Montserrat -->
+  <!-- Pustaka PapaParse, Montserrat, dan UnifrakturMaguntia (Font Blackletter / Gothic) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 
   <style>
-    /* Import Font Celandine via CDN / Font-face */
-    @font-face {
-      font-family: 'Celandine';
-      src: url('https://fonts.cdnfonts.com/s/72911/Celandine.woff') format('woff');
-      font-weight: normal;
-      font-style: normal;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -198,7 +192,6 @@
 
     <div class="message" id="messageBox"></div>
 
-    <!-- Area daftar pilihan jika ditemukan lebih dari 1 nama -->
     <div class="pilihan-container" id="pilihanArea">
       <p>Ditemukan beberapa nama yang cocok, silakan pilih nama Anda:</p>
       <div class="pilihan-list" id="pilihanList"></div>
@@ -213,22 +206,21 @@
   <script>
     // --- KONFIGURASI FILE & PENGATURAN FONT ---
     const CONFIG = {
-      namaFileGambar: 'sertifikat.png', // Nama file gambar sertifikat
-      namaFileCSV: 'peserta.csv',        // Nama file CSV data peserta
+      namaFileGambar: 'sertifikat.png', 
+      namaFileCSV: 'peserta.csv',        
 
-      // Sesuai permintaan: Celandine 105px & Montserrat 39px
-      // Catatan: Jika skala resolusi gambar Anda 1024x724px, ukuran disesuaikan secara proporsional
-      posisiNama: { x: 512, y: 275, font: '105px "Celandine", cursive', color: '#1e293b' },
-      posisiPeran: { x: 512, y: 332, font: '600 39px Montserrat, sans-serif', color: '#1e293b' }
+      // Posisi dasar & warna
+      posisiNama: { x: 512, y: 275, color: '#1e293b' },
+      posisiPeran: { x: 512, y: 340, color: '#1e293b' }
     };
 
     let dataPeserta = [];
     let certImage = new Image();
     let currentDataPeserta = null;
 
-    // Load Font sebelum merender
-    document.fonts.load('105px "Celandine"');
-    document.fonts.load('600 39px Montserrat');
+    // Load Font Google sebelum menggambar di Canvas
+    document.fonts.load('bold 72px "UnifrakturMaguntia"');
+    document.fonts.load('700 48px Montserrat');
 
     window.addEventListener('DOMContentLoaded', () => {
       Papa.parse(CONFIG.namaFileCSV, {
@@ -290,12 +282,10 @@
         'seksi konsumsi', 'seksi dokumentasi', 'seksi upacara'
       ];
 
-      // Filter berdasarkan kata kunci nama & peran (Pencarian Parsial)
       const hasilMatches = dataPeserta.filter(row => {
         const namaCsv = cleanString(row['Nama Peserta'] || row['Nama'] || row['nama']);
         const peranCsv = cleanString(row['Peran'] || row['peran']);
 
-        // Cek apakah kata kunci ada di dalam nama CSV (Contains / Partial Match)
         const matchNama = namaCsv.includes(queryNama);
         if (!matchNama) return false;
 
@@ -314,7 +304,6 @@
         currentDataPeserta = hasilMatches[0];
         generateCertificate(currentDataPeserta);
       } else {
-        // Jika ada lebih dari 1 pencocokan, tampilkan daftar pilihan nama
         pilihanList.innerHTML = '';
         hasilMatches.forEach(item => {
           const btnName = document.createElement('button');
@@ -346,29 +335,45 @@
 
       if (cleanString(peran) === 'p') peran = 'Peserta';
 
-      // Hitung skala font jika resolusi gambar berbeda dari standar 1024px
       const scale = nativeWidth / 1024;
       
-      // Ukuran Font Sesuai Permintaan (Celandine 105px & Montserrat 39px)
-      const fontSizeNama = Math.round(105 * (scale < 1 ? scale : 0.35)); 
-      const fontSizePeran = Math.round(39 * (scale < 1 ? scale : 0.55));
+      // Ukuran Font yang disesuaikan (54pt ~ 72px untuk Nama, 36pt ~ 48px untuk Peran)
+      const fontSizeNama = Math.round(72 * scale); 
+      const fontSizePeran = Math.round(48 * scale);
 
-      // 1. Tulis Nama Peserta dengan font Celandine
-      ctx.font = `${fontSizeNama}px "Celandine", cursive`;
+      const posXNama = Math.round(CONFIG.posisiNama.x * scale);
+      const posYNama = Math.round(CONFIG.posisiNama.y * scale);
+      const posXPeran = Math.round(CONFIG.posisiPeran.x * scale);
+      const posYPeran = Math.round(CONFIG.posisiPeran.y * scale);
+
+      // 1. Tulis Nama Peserta dengan font Gothic / Blackletter (UnifrakturMaguntia Bold)
+      ctx.font = `bold ${fontSizeNama}px "UnifrakturMaguntia", serif`;
       ctx.fillStyle = CONFIG.posisiNama.color;
       ctx.textAlign = 'center';
-      ctx.fillText(nama, Math.round(512 * scale), Math.round(275 * scale));
+      ctx.fillText(nama, posXNama, posYNama);
 
-      // 2. Tulis Peran dengan font Montserrat
-      ctx.font = `600 ${fontSizePeran}px Montserrat, sans-serif`;
+      // Menambahkan Efek Garis Bawah (Underline) untuk Nama Peserta
+      const textMetrics = ctx.measureText(nama);
+      const textWidth = textMetrics.width;
+      const underlineY = posYNama + Math.round(10 * scale); // Jarak garis di bawah teks
+      const underlineThickness = Math.max(2, Math.round(3 * scale)); // Ketebalan garis
+
+      ctx.beginPath();
+      ctx.moveTo(posXNama - (textWidth / 2), underlineY);
+      ctx.lineTo(posXNama + (textWidth / 2), underlineY);
+      ctx.strokeStyle = CONFIG.posisiNama.color;
+      ctx.lineWidth = underlineThickness;
+      ctx.stroke();
+
+      // 2. Tulis Peran dengan font Sans-Serif Bold (Montserrat Bold, ALL CAPS)
+      ctx.font = `700 ${fontSizePeran}px "Montserrat", sans-serif`;
       ctx.fillStyle = CONFIG.posisiPeran.color;
       ctx.textAlign = 'center';
-      ctx.fillText(peran, Math.round(512 * scale), Math.round(332 * scale));
+      ctx.fillText(peran.toUpperCase(), posXPeran, posYPeran);
 
       previewArea.style.display = 'block';
     }
 
-    // Tombol Download
     downloadBtn.addEventListener('click', () => {
       if (!currentDataPeserta) return;
       const nama = currentDataPeserta['Nama Peserta'] || currentDataPeserta['Nama'] || 'Peserta';
