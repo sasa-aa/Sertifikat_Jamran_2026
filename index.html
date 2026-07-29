@@ -5,16 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JAMBORE RANTING TAHUN 2026</title>
   
-  <!-- Pustaka PapaParse untuk membaca CSV & Font Google Poppins -->
+  <!-- Pustaka PapaParse & Font Montserrat -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* Import Font Celandine via CDN / Font-face */
+    @font-face {
+      font-family: 'Celandine';
+      src: url('https://fonts.cdnfonts.com/s/72911/Celandine.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Montserrat', sans-serif;
     }
 
     body {
@@ -114,6 +122,43 @@
       font-weight: 500;
     }
 
+    .pilihan-container {
+      margin-top: 16px;
+      text-align: left;
+      display: none;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .pilihan-container p {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #475569;
+    }
+
+    .pilihan-list button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .pilihan-list button:hover {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
+
     .preview-container {
       margin-top: 24px;
       display: none;
@@ -135,8 +180,8 @@
     <p class="subtitle">unduh sertifikat keikutsertaan Anda disini</p>
 
     <div class="form-group">
-      <label for="namaInput">Nama Lengkap Peserta</label>
-      <input type="text" id="namaInput" placeholder="Masukkan nama sesuai daftar..." autocomplete="off">
+      <label for="namaInput">Nama Peserta (Bisa 1 atau 2 Kata)</label>
+      <input type="text" id="namaInput" placeholder="Ketik kata kunci nama..." autocomplete="off">
     </div>
 
     <div class="form-group">
@@ -153,6 +198,12 @@
 
     <div class="message" id="messageBox"></div>
 
+    <!-- Area daftar pilihan jika ditemukan lebih dari 1 nama -->
+    <div class="pilihan-container" id="pilihanArea">
+      <p>Ditemukan beberapa nama yang cocok, silakan pilih nama Anda:</p>
+      <div class="pilihan-list" id="pilihanList"></div>
+    </div>
+
     <div class="preview-container" id="previewArea">
       <canvas id="certCanvas"></canvas>
       <button class="btn btn-download" id="downloadBtn">Unduh Sertifikat</button>
@@ -160,25 +211,25 @@
   </div>
 
   <script>
-    // --- KONFIGURASI FILE & POSISI KOORDINAT PADA GAMBAR ---
+    // --- KONFIGURASI FILE & PENGATURAN FONT ---
     const CONFIG = {
-      namaFileGambar: 'sertifikat.png', // Pastikan nama file gambar sertifikat Anda
+      namaFileGambar: 'sertifikat.png', // Nama file gambar sertifikat
       namaFileCSV: 'peserta.csv',        // Nama file CSV data peserta
 
-      // Titik koordinat disesuaikan dengan template sertifikat Anda (Lebar: 1024px, Tinggi: 724px)
-      posisiNama: { x: 512, y: 275, font: 'bold 22px Poppins', color: '#1e293b' },
-      posisiPeran: { x: 512, y: 332, font: '600 18px Poppins', color: '#1e293b' }
+      // Sesuai permintaan: Celandine 105px & Montserrat 39px
+      // Catatan: Jika skala resolusi gambar Anda 1024x724px, ukuran disesuaikan secara proporsional
+      posisiNama: { x: 512, y: 275, font: '105px "Celandine", cursive', color: '#1e293b' },
+      posisiPeran: { x: 512, y: 332, font: '600 39px Montserrat, sans-serif', color: '#1e293b' }
     };
 
     let dataPeserta = [];
     let certImage = new Image();
     let currentDataPeserta = null;
 
-    // Memuat Font Google 'Poppins' ke Canvas sebelum menggambar
-    document.fonts.load('bold 22px Poppins');
-    document.fonts.load('600 18px Poppins');
+    // Load Font sebelum merender
+    document.fonts.load('105px "Celandine"');
+    document.fonts.load('600 39px Montserrat');
 
-    // Load CSV saat halaman pertama kali diakses
     window.addEventListener('DOMContentLoaded', () => {
       Papa.parse(CONFIG.namaFileCSV, {
         download: true,
@@ -187,10 +238,10 @@
         encoding: 'UTF-8',
         complete: function(results) {
           dataPeserta = results.data;
-          console.log('CSV berhasil dimuat:', dataPeserta.length, 'data.');
+          console.log('CSV dimuat:', dataPeserta.length, 'data.');
         },
         error: function(err) {
-          showMessage('Gagal membaca file CSV peserta. Pastikan file peserta.csv sudah berada di folder yang sama.', true);
+          showMessage('Gagal membaca file CSV peserta. Pastikan file peserta.csv tersedia.', true);
         }
       });
 
@@ -204,95 +255,116 @@
     const namaInput = document.getElementById('namaInput');
     const peranSelect = document.getElementById('peranSelect');
     const messageBox = document.getElementById('messageBox');
+    const pilihanArea = document.getElementById('pilihanArea');
+    const pilihanList = document.getElementById('pilihanList');
     const previewArea = document.getElementById('previewArea');
     const canvas = document.getElementById('certCanvas');
     const ctx = canvas.getContext('2d');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // Fungsi normalisasi string untuk pencarian fleksibel (abaikan spasi ganda, tanda petik, dan huruf besar/kecil)
     function cleanString(str) {
       if (!str) return '';
       return str.toString()
                 .toLowerCase()
-                .replace(/['`’]/g, "'") // menyelaraskan jenis tanda petik
+                .replace(/['`’]/g, "'")
                 .replace(/\s+/g, ' ')
                 .trim();
     }
 
     cariBtn.addEventListener('click', () => {
-      const namaCari = cleanString(namaInput.value);
+      const queryNama = cleanString(namaInput.value);
       const peranCari = peranSelect.value;
 
       messageBox.textContent = '';
+      pilihanArea.style.display = 'none';
       previewArea.style.display = 'none';
 
-      if (!namaCari || !peranCari) {
-        showMessage('Silakan isi nama dan pilih peran Anda.');
+      if (!queryNama || !peranCari) {
+        showMessage('Silakan ketikkan nama dan pilih peran Anda.');
         return;
       }
 
-      // Daftar kata kunci peran panitia spesifik
       const daftarPanitiaSpesifik = [
         'panitia', 'penanggung jawab', 'ketua', 'wakil ketua', 'sekertaris', 
         'bendahara', 'seksi kegiatan & lomba', 'seksi perlengkapan', 
         'seksi konsumsi', 'seksi dokumentasi', 'seksi upacara'
       ];
 
-      // Pencocokan Data
-      const hasil = dataPeserta.find(row => {
+      // Filter berdasarkan kata kunci nama & peran (Pencarian Parsial)
+      const hasilMatches = dataPeserta.filter(row => {
         const namaCsv = cleanString(row['Nama Peserta'] || row['Nama'] || row['nama']);
         const peranCsv = cleanString(row['Peran'] || row['peran']);
 
-        if (namaCsv !== namaCari) return false;
+        // Cek apakah kata kunci ada di dalam nama CSV (Contains / Partial Match)
+        const matchNama = namaCsv.includes(queryNama);
+        if (!matchNama) return false;
 
         if (peranCari === 'Panitia') {
-          // Jika memilih dropdown Panitia, cocokkan jika peran CSV termasuk dalam struktur panitia
           return daftarPanitiaSpesifik.some(p => peranCsv.includes(p));
         } else if (peranCari === 'Peserta') {
           return peranCsv === 'peserta' || peranCsv === 'p';
         } else {
-          // Untuk Pembina Pendamping
           return peranCsv === cleanString(peranCari);
         }
       });
 
-      if (hasil) {
-        currentDataPeserta = hasil;
-        generateCertificate(hasil);
+      if (hasilMatches.length === 0) {
+        showMessage('Data tidak ditemukan. Coba ketikkan kata kunci nama yang lain.');
+      } else if (hasilMatches.length === 1) {
+        currentDataPeserta = hasilMatches[0];
+        generateCertificate(currentDataPeserta);
       } else {
-        showMessage('Data tidak ditemukan. Pastikan ejaan nama dan pilihan peran sudah sesuai dengan daftar.');
+        // Jika ada lebih dari 1 pencocokan, tampilkan daftar pilihan nama
+        pilihanList.innerHTML = '';
+        hasilMatches.forEach(item => {
+          const btnName = document.createElement('button');
+          const namaLengkap = item['Nama Peserta'] || item['Nama'] || item['nama'];
+          const peran = item['Peran'] || item['peran'];
+          btnName.textContent = `${namaLengkap} (${peran})`;
+          btnName.onclick = () => {
+            pilihanArea.style.display = 'none';
+            currentDataPeserta = item;
+            generateCertificate(item);
+          };
+          pilihanList.appendChild(btnName);
+        });
+        pilihanArea.style.display = 'block';
       }
     });
 
     function generateCertificate(data) {
-      // Ukuran Canvas mengikuti resolusi gambar asli (1024x724 px)
-      canvas.width = certImage.naturalWidth || 1024;
-      canvas.height = certImage.naturalHeight || 724;
+      const nativeWidth = certImage.naturalWidth || 1024;
+      const nativeHeight = certImage.naturalHeight || 724;
 
-      // Draw background gambar sertifikat
+      canvas.width = nativeWidth;
+      canvas.height = nativeHeight;
+
       ctx.drawImage(certImage, 0, 0);
 
       const nama = data['Nama Peserta'] || data['Nama'] || data['nama'];
       let peran = data['Peran'] || data['peran'];
 
-      // Jika di CSV tertulis "P", ubah tampilan menjadi "Peserta"
-      if (cleanString(peran) === 'p') {
-        peran = 'Peserta';
-      }
+      if (cleanString(peran) === 'p') peran = 'Peserta';
 
-      // 1. Tulis Nama Peserta (Garis Pertama)
-      ctx.font = CONFIG.posisiNama.font;
+      // Hitung skala font jika resolusi gambar berbeda dari standar 1024px
+      const scale = nativeWidth / 1024;
+      
+      // Ukuran Font Sesuai Permintaan (Celandine 105px & Montserrat 39px)
+      const fontSizeNama = Math.round(105 * (scale < 1 ? scale : 0.35)); 
+      const fontSizePeran = Math.round(39 * (scale < 1 ? scale : 0.55));
+
+      // 1. Tulis Nama Peserta dengan font Celandine
+      ctx.font = `${fontSizeNama}px "Celandine", cursive`;
       ctx.fillStyle = CONFIG.posisiNama.color;
       ctx.textAlign = 'center';
-      ctx.fillText(nama, CONFIG.posisiNama.x, CONFIG.posisiNama.y);
+      ctx.fillText(nama, Math.round(512 * scale), Math.round(275 * scale));
 
-      // 2. Tulis Peran Spesifik (Garis Kedua)
-      ctx.font = CONFIG.posisiPeran.font;
+      // 2. Tulis Peran dengan font Montserrat
+      ctx.font = `600 ${fontSizePeran}px Montserrat, sans-serif`;
       ctx.fillStyle = CONFIG.posisiPeran.color;
       ctx.textAlign = 'center';
-      ctx.fillText(peran, CONFIG.posisiPeran.x, CONFIG.posisiPeran.y);
+      ctx.fillText(peran, Math.round(512 * scale), Math.round(332 * scale));
 
-      // Tampilkan hasil preview sertifikat
       previewArea.style.display = 'block';
     }
 
