@@ -3,336 +3,313 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unduh Sertifikat Jambore Ranting 2026</title>
+  <title>JAMBORE RANTING TAHUN 2026</title>
+  
+  <!-- Pustaka PapaParse untuk membaca CSV & Font Google Poppins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      color: #333;
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #f0f3f8;
+      color: #1e293b;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
-    .container {
-      max-width: 650px;
+
+    .card {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      max-width: 680px;
       width: 100%;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       text-align: center;
     }
-    h1 { color: #1f4e79; margin-bottom: 8px; font-size: 22px; }
-    p.subtitle { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-    
-    .status-badge {
-      font-size: 12px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      display: inline-block;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-    .status-loading { background-color: #e2e8f0; color: #4a5568; }
-    .status-ready { background-color: #c6f6d5; color: #22543d; }
-    .status-error { background-color: #fed7d7; color: #9b2c2c; }
 
-    .form-group {
-      text-align: left;
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      font-size: 14px;
-      color: #444;
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a8a;
+      letter-spacing: 0.5px;
       margin-bottom: 6px;
     }
-    input[type="text"], select {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.3s;
-      background-color: #fff;
+
+    p.subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
     }
-    input[type="text"]:focus, select:focus { border-color: #1f4e79; }
-    
-    .btn-search {
-      width: 100%;
-      padding: 13px;
-      background-color: #1f4e79;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin-top: 10px;
+
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
     }
-    .btn-search:hover { background-color: #153756; }
-    .btn-search:disabled { background-color: #a0aec0; cursor: not-allowed; }
-    
-    .alert-error {
-      background-color: #fff5f5;
-      color: #c53030;
-      border: 1px solid #feb2b2;
-      padding: 12px;
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 14px;
-      margin-top: 15px;
+      outline: none;
+      transition: all 0.2s ease;
+      background-color: #fff;
+    }
+
+    input:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn {
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-download {
+      background-color: #059669;
+      margin-top: 16px;
+    }
+
+    .btn-download:hover {
+      background-color: #047857;
+    }
+
+    .message {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .preview-container {
+      margin-top: 24px;
       display: none;
     }
 
-    .preview-area {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 2px dashed #e2e8f0;
-      display: none;
-    }
-    .preview-area h3 {
-      color: #2d3748;
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
     canvas {
-      max-width: 100%;
+      width: 100%;
       height: auto;
-      border: 1px solid #cbd5e0;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .btn-download {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 14px 30px;
-      background-color: #27ae60;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background 0.3s;
-      box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
-    }
-    .btn-download:hover { background-color: #219150; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Cari & Unduh Sertifikat<br>Jambore Ranting 2026</h1>
-    <p class="subtitle">Masukkan 1 atau 2 kata dari nama Anda dan pilih peran Anda saat kegiatan untuk menampilkan sertifikat.</p>
+  <div class="card">
+    <h1>JAMBORE RANTING TAHUN 2026</h1>
+    <p class="subtitle">unduh sertifikat keikutsertaan Anda disini</p>
 
-    <!-- STATUS PEMUATAN DATA CSV -->
-    <div id="dataStatus" class="status-badge status-loading">Memuat data peserta...</div>
-
-    <!-- FORM PENCARIAN -->
     <div class="form-group">
-      <label for="nameInput">Nama Lengkap / Kata Kunci Nama:</label>
-      <input type="text" id="nameInput" placeholder="Contoh: Budi atau Ahmad Budi..." autocomplete="off">
+      <label for="namaInput">Nama Lengkap Peserta</label>
+      <input type="text" id="namaInput" placeholder="Masukkan nama sesuai daftar..." autocomplete="off">
     </div>
 
     <div class="form-group">
-      <label for="roleSelect">Peran / Jabatan Kegiatan:</label>
-      <select id="roleSelect" disabled>
-        <option value="">-- Memuat Peran... --</option>
+      <label for="peranSelect">Peran</label>
+      <select id="peranSelect">
+        <option value="" disabled selected>-- Pilih Peran --</option>
+        <option value="Peserta">Peserta</option>
+        <option value="Pembina Pendamping">Pembina Pendamping</option>
+        <option value="Panitia">Panitia</option>
       </select>
     </div>
 
-    <button type="button" id="searchBtn" class="btn-search" onclick="searchCertificate()" disabled>Cari Sertifikat</button>
+    <button class="btn" id="cariBtn">Cari Sertifikat</button>
 
-    <div id="errorMessage" class="alert-error"></div>
+    <div class="message" id="messageBox"></div>
 
-    <!-- AREA PRATINJAU & UNDUH -->
-    <div id="previewArea" class="preview-area">
-      <h3>Sertifikat Siap Diunduh!</h3>
+    <div class="preview-container" id="previewArea">
       <canvas id="certCanvas"></canvas>
-      <br>
-      <a id="downloadBtn" class="btn-download" download="Sertifikat.png">Unduh Sertifikat (PNG)</a>
+      <button class="btn btn-download" id="downloadBtn">Unduh Sertifikat</button>
     </div>
   </div>
 
   <script>
-    let participants = [];
+    // --- KONFIGURASI FILE & POSISI KOORDINAT PADA GAMBAR ---
+    const CONFIG = {
+      namaFileGambar: 'sertifikat.png', // Pastikan nama file gambar sertifikat Anda
+      namaFileCSV: 'peserta.csv',        // Nama file CSV data peserta
 
-    // Memuat file peserta.csv saat halaman dibuka
+      // Titik koordinat disesuaikan dengan template sertifikat Anda (Lebar: 1024px, Tinggi: 724px)
+      posisiNama: { x: 512, y: 275, font: 'bold 22px Poppins', color: '#1e293b' },
+      posisiPeran: { x: 512, y: 332, font: '600 18px Poppins', color: '#1e293b' }
+    };
+
+    let dataPeserta = [];
+    let certImage = new Image();
+    let currentDataPeserta = null;
+
+    // Memuat Font Google 'Poppins' ke Canvas sebelum menggambar
+    document.fonts.load('bold 22px Poppins');
+    document.fonts.load('600 18px Poppins');
+
+    // Load CSV saat halaman pertama kali diakses
     window.addEventListener('DOMContentLoaded', () => {
-      fetch('peserta.csv')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Gagal memuat berkas peserta.csv');
-          }
-          return response.text();
-        })
-        .then(csvText => {
-          parseCSV(csvText);
-          populateRolesDropdown();
+      Papa.parse(CONFIG.namaFileCSV, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        encoding: 'UTF-8',
+        complete: function(results) {
+          dataPeserta = results.data;
+          console.log('CSV berhasil dimuat:', dataPeserta.length, 'data.');
+        },
+        error: function(err) {
+          showMessage('Gagal membaca file CSV peserta. Pastikan file peserta.csv sudah berada di folder yang sama.', true);
+        }
+      });
 
-          const statusDiv = document.getElementById('dataStatus');
-          statusDiv.className = 'status-badge status-ready';
-          statusDiv.textContent = `✓ Data ${participants.length} peserta siap`;
-          document.getElementById('searchBtn').disabled = false;
-        })
-        .catch(error => {
-          console.error(error);
-          const statusDiv = document.getElementById('dataStatus');
-          statusDiv.className = 'status-badge status-error';
-          statusDiv.textContent = '✕ Berkas peserta.csv tidak ditemukan/gagal dimuat';
-        });
+      certImage.src = CONFIG.namaFileGambar;
+      certImage.onerror = () => {
+        showMessage('Gagal memuat gambar sertifikat. Pastikan file sertifikat.png tersedia.', true);
+      };
     });
 
-    // Fungsi Parser CSV Sederhana
-    function parseCSV(text) {
-      const lines = text.split(/\r\n|\n/);
-      participants = [];
+    const cariBtn = document.getElementById('cariBtn');
+    const namaInput = document.getElementById('namaInput');
+    const peranSelect = document.getElementById('peranSelect');
+    const messageBox = document.getElementById('messageBox');
+    const previewArea = document.getElementById('previewArea');
+    const canvas = document.getElementById('certCanvas');
+    const ctx = canvas.getContext('2d');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        const parts = line.split(',');
-        if (parts.length >= 2) {
-          const name = parts[0].trim();
-          const role = parts[1].trim();
-          if (name && role) {
-            participants.push({ name, role });
-          }
-        }
-      }
+    // Fungsi normalisasi string untuk pencarian fleksibel (abaikan spasi ganda, tanda petik, dan huruf besar/kecil)
+    function cleanString(str) {
+      if (!str) return '';
+      return str.toString()
+                .toLowerCase()
+                .replace(/['`’]/g, "'") // menyelaraskan jenis tanda petik
+                .replace(/\s+/g, ' ')
+                .trim();
     }
 
-    // Mengisi pilihan dropdown Peran secara otomatis dari data CSV
-    function populateRolesDropdown() {
-      const roleSelect = document.getElementById('roleSelect');
-      
-      // Ambil daftar peran unik
-      const rolesSet = new Set();
-      participants.forEach(p => rolesSet.add(p.role));
-      
-      // Urutkan daftar peran
-      const sortedRoles = Array.from(rolesSet).sort();
+    cariBtn.addEventListener('click', () => {
+      const namaCari = cleanString(namaInput.value);
+      const peranCari = peranSelect.value;
 
-      roleSelect.innerHTML = '<option value="">-- Pilih Peran --</option>';
-      sortedRoles.forEach(role => {
-        const opt = document.createElement('option');
-        opt.value = role;
-        opt.textContent = role;
-        roleSelect.appendChild(opt);
-      });
-
-      roleSelect.disabled = false;
-    }
-
-    function searchCertificate() {
-      const inputName = document.getElementById('nameInput').value.trim();
-      const selectedRole = document.getElementById('roleSelect').value;
-      const errorDiv = document.getElementById('errorMessage');
-      const previewArea = document.getElementById('previewArea');
-
-      errorDiv.style.display = 'none';
+      messageBox.textContent = '';
       previewArea.style.display = 'none';
 
-      if (!inputName) {
-        errorDiv.textContent = 'Silakan masukkan nama Anda (minimal 1 kata).';
-        errorDiv.style.display = 'block';
+      if (!namaCari || !peranCari) {
+        showMessage('Silakan isi nama dan pilih peran Anda.');
         return;
       }
 
-      if (!selectedRole) {
-        errorDiv.textContent = 'Silakan pilih peran Anda terlebih dahulu.';
-        errorDiv.style.display = 'block';
-        return;
-      }
+      // Daftar kata kunci peran panitia spesifik
+      const daftarPanitiaSpesifik = [
+        'panitia', 'penanggung jawab', 'ketua', 'wakil ketua', 'sekertaris', 
+        'bendahara', 'seksi kegiatan & lomba', 'seksi perlengkapan', 
+        'seksi konsumsi', 'seksi dokumentasi', 'seksi upacara'
+      ];
 
-      const keywords = inputName.toLowerCase().split(/\s+/);
+      // Pencocokan Data
+      const hasil = dataPeserta.find(row => {
+        const namaCsv = cleanString(row['Nama Peserta'] || row['Nama'] || row['nama']);
+        const peranCsv = cleanString(row['Peran'] || row['peran']);
 
-      // Pencocokan nama dan peran
-      const found = participants.find(person => {
-        const lowerName = person.name.toLowerCase();
-        const matchesName = keywords.every(kw => lowerName.includes(kw));
-        const matchesRole = person.role.toLowerCase() === selectedRole.toLowerCase();
-        return matchesName && matchesRole;
+        if (namaCsv !== namaCari) return false;
+
+        if (peranCari === 'Panitia') {
+          // Jika memilih dropdown Panitia, cocokkan jika peran CSV termasuk dalam struktur panitia
+          return daftarPanitiaSpesifik.some(p => peranCsv.includes(p));
+        } else if (peranCari === 'Peserta') {
+          return peranCsv === 'peserta' || peranCsv === 'p';
+        } else {
+          // Untuk Pembina Pendamping
+          return peranCsv === cleanString(peranCari);
+        }
       });
 
-      if (found) {
-        generateCertificate(found.name, found.role);
+      if (hasil) {
+        currentDataPeserta = hasil;
+        generateCertificate(hasil);
       } else {
-        errorDiv.textContent = `Sertifikat tidak ditemukan untuk nama "${inputName}" dengan peran "${selectedRole}". Pastikan ejaan nama dan pilihan peran sudah benar.`;
-        errorDiv.style.display = 'block';
+        showMessage('Data tidak ditemukan. Pastikan ejaan nama dan pilihan peran sudah sesuai dengan daftar.');
       }
+    });
+
+    function generateCertificate(data) {
+      // Ukuran Canvas mengikuti resolusi gambar asli (1024x724 px)
+      canvas.width = certImage.naturalWidth || 1024;
+      canvas.height = certImage.naturalHeight || 724;
+
+      // Draw background gambar sertifikat
+      ctx.drawImage(certImage, 0, 0);
+
+      const nama = data['Nama Peserta'] || data['Nama'] || data['nama'];
+      let peran = data['Peran'] || data['peran'];
+
+      // Jika di CSV tertulis "P", ubah tampilan menjadi "Peserta"
+      if (cleanString(peran) === 'p') {
+        peran = 'Peserta';
+      }
+
+      // 1. Tulis Nama Peserta (Garis Pertama)
+      ctx.font = CONFIG.posisiNama.font;
+      ctx.fillStyle = CONFIG.posisiNama.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(nama, CONFIG.posisiNama.x, CONFIG.posisiNama.y);
+
+      // 2. Tulis Peran Spesifik (Garis Kedua)
+      ctx.font = CONFIG.posisiPeran.font;
+      ctx.fillStyle = CONFIG.posisiPeran.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(peran, CONFIG.posisiPeran.x, CONFIG.posisiPeran.y);
+
+      // Tampilkan hasil preview sertifikat
+      previewArea.style.display = 'block';
     }
 
-    function generateCertificate(name, role) {
-      const previewArea = document.getElementById('previewArea');
-      const canvas = document.getElementById('certCanvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
+    // Tombol Download
+    downloadBtn.addEventListener('click', () => {
+      if (!currentDataPeserta) return;
+      const nama = currentDataPeserta['Nama Peserta'] || currentDataPeserta['Nama'] || 'Peserta';
+      const namaFile = nama.replace(/[^a-zA-Z0-9]/g, '_');
+      
+      const link = document.createElement('a');
+      link.download = `Sertifikat_${namaFile}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
 
-      img.src = 'sertifikat_polos.png';
-
-      img.onload = function() {
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        // 1. Gambar latar belakang
-        ctx.drawImage(img, 0, 0);
-
-        const xPos = canvas.width / 2;
-
-        // 2. CETAK NAMA PESERTA
-        const fontSizeName = Math.round(canvas.height * 0.048);
-        ctx.font = `bold ${fontSizeName}px "Times New Roman", serif`;
-        ctx.fillStyle = '#111111';
-        ctx.textAlign = 'center';
-        
-        const yName = canvas.height * 0.368;
-        ctx.fillText(name, xPos, yName);
-
-        // Garis Bawah Nama
-        const textMetrics = ctx.measureText(name);
-        const textWidth = textMetrics.width;
-        ctx.beginPath();
-        ctx.lineWidth = Math.max(2, Math.round(canvas.height * 0.003));
-        ctx.strokeStyle = '#111111';
-        ctx.moveTo(xPos - (textWidth / 2), yName + 8);
-        ctx.lineTo(xPos + (textWidth / 2), yName + 8);
-        ctx.stroke();
-
-        // 3. CETAK PERAN
-        // Menyesuaikan ukuran font otomatis jika nama peran terlalu panjang (misal: "SEKSI KEGIATAN & LOMBA")
-        let fontSizeRole = Math.round(canvas.height * 0.050);
-        if (role.length > 20) {
-          fontSizeRole = Math.round(canvas.height * 0.038);
-        }
-
-        ctx.font = `bold ${fontSizeRole}px Arial, sans-serif`;
-        ctx.fillStyle = '#000000';
-        ctx.textAlign = 'center';
-
-        const yRole = canvas.height * 0.468;
-        ctx.fillText(role.toUpperCase(), xPos, yRole);
-
-        // Tampilkan hasil
-        previewArea.style.display = 'block';
-        previewArea.scrollIntoView({ behavior: 'smooth' });
-
-        // Tautan Unduh
-        const downloadBtn = document.getElementById('downloadBtn');
-        downloadBtn.href = canvas.toDataURL('image/png');
-        downloadBtn.download = `Sertifikat_${name.replace(/[^a-zA-Z0-9]/g, '_')}_${role.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-      };
-
-      img.onerror = function() {
-        alert('Gagal memuat sertifikat_polos.png. Pastikan file gambar berada dalam folder repository yang sama.');
-      };
+    function showMessage(msg) {
+      messageBox.textContent = msg;
     }
   </script>
 </body>
